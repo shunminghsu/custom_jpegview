@@ -337,7 +337,7 @@ BEGIN
             MENUITEM "Waiting time\t5 sec",         IDM_SLIDESHOW_5
             MENUITEM "Waiting time\t7 sec",         IDM_SLIDESHOW_7
             MENUITEM "Waiting time\t10 sec",        IDM_SLIDESHOW_10
-            MENUITEM "Waiting time\t20 sec",        IDM_SLIDESHOW_20
+            MENUITEM "Waiting time\t6 sec",        IDM_SLIDESHOW_20
             POPUP "Transition Effect"
             BEGIN
                 MENUITEM "None",                        IDM_EFFECT_NONE

@@ -1505,8 +1505,10 @@ void CMainDlg::ExecuteCommand(int nCommand) {
 		case IDM_SLIDESHOW_5:
 		case IDM_SLIDESHOW_7:
 		case IDM_SLIDESHOW_10:
+		    StartMovieMode(1.0/(nCommand - IDM_SLIDESHOW_START));
+			break;
 		case IDM_SLIDESHOW_20:
-			StartMovieMode(1.0/(nCommand - IDM_SLIDESHOW_START));
+			StartMovieMode(1.0/ 6.0);
 			break;
 		case IDM_EFFECT_NONE:
 		case IDM_EFFECT_BLEND:
