@@ -1,4 +1,4 @@
-name: Build custom_jpegview VS2019
+name: Build custom_jpegview
 
 on:
   workflow_dispatch:
@@ -17,6 +17,7 @@ jobs:
       uses: microsoft/setup-msbuild@v2
 
     - name: Build Release x64
+      working-directory: src
       shell: cmd
       run: |
         msbuild JPEGView.sln ^
@@ -29,5 +30,5 @@ jobs:
       with:
         name: JPEGView-x64
         path: |
-          JPEGView/bin/x64/Release/*.exe
-          JPEGView/bin/x64/Release/*.dll
+          src/JPEGView/bin/x64/Release/*.exe
+          src/JPEGView/bin/x64/Release/*.dll
