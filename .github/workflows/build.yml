@@ -13,11 +13,16 @@ jobs:
       with:
         submodules: recursive
     
+    # 修改這個步驟：直接為現有的 VS 2022 Enterprise 補上 ATL 與 MFC 組件
+    - name: Install ATL/MFC
+      shell: powershell
+      run: |
+        Start-Process -FilePath "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" `
+          -ArgumentList "modify --installPath `"C:\Program Files\Microsoft Visual Studio\2022\Enterprise`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --passive --norestart" `
+          -Wait
+
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
-
-    - name: Install ATL/MFC
-      run: choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.ATLMFC"
   
     - name: Setup MSVC dev environment (WITH ATL)
       uses: ilammy/msvc-dev-cmd@v1
@@ -29,12 +34,14 @@ jobs:
       run: |
         echo %INCLUDE%
     
+    # 這裡幫您加上 /t:Rebuild 確保乾淨編譯
     - name: Build Release x64
       working-directory: src
       shell: cmd
       run: |
         msbuild JPEGView.sln ^
           /m ^
+          /t:Rebuild ^
           /p:Configuration=Release ^
           /p:Platform=x64
 
