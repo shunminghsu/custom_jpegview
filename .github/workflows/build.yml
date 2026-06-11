@@ -16,6 +16,13 @@ jobs:
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
+    - name: Setup MSVC + ATL components
+      uses: ilammy/msvc-dev-cmd@v1
+
+    - name: Install VC++ ATL/MFC
+      run: |
+        choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.ATLMFC"
+    
     - name: Build Release x64
       working-directory: src
       shell: cmd
