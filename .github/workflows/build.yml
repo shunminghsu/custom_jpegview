@@ -55,15 +55,20 @@ jobs:
     - name: Self-sign Binaries
       shell: powershell
       run: |
-        # 1. 建立臨時憑證
+        # 1. 建立臨時程式碼簽署憑證
         $cert = New-SelfSignedCertificate -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My -Subject "CN=GitHubActionBuild"
         
-        # 2. 尋找 signtool.exe 的路徑
-        $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recycle -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+        # 2. 尋找系統中的 signtool.exe（修正參數為 -Recurse）
+        $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
         
-        # 3. 進行簽章
-        & $signtool sign /a /s My /n "GitHubActionBuild" src/JPEGView/bin/x64/Release/JPEGView.exe
-        & $signtool sign /a /s My /n "GitHubActionBuild" src/JPEGView/bin/x64/Release/WICLoader.dll
+        # 如果動態搜尋失敗，使用預設的 x64 工具路徑
+        if (-not $signtool) { $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" }
+        Write-Output "Using Signtool: $signtool"
+        
+        # 3. 執行數位簽章
+        & $signtool sign /a /s My /n "GitHubActionBuild" /fd SHA256 src/JPEGView/bin/x64/Release/JPEGView.exe
+        & $signtool sign /a /s My /n "GitHubActionBuild" /fd SHA256 src/JPEGView/bin/x64/Release/WICLoader.dll
+
 
     - name: Upload binaries
       uses: actions/upload-artifact@v4
