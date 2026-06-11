@@ -13,13 +13,22 @@ jobs:
       with:
         submodules: recursive
     
-    # 修改這個步驟：直接為現有的 VS 2022 Enterprise 補上 ATL 與 MFC 組件
-    - name: Install ATL/MFC
+    # 方案 1：使用 vswhere 自動尋找 VS 安裝路徑，並使用「舊版」相容的 MSVC 14.29 工具組（對應您日誌中的 vc142）
+    - name: Install ATL/MFC Components
       shell: powershell
       run: |
-        Start-Process -FilePath "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" `
-          -ArgumentList "modify --installPath `"C:\Program Files\Microsoft Visual Studio\2022\Enterprise`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --passive --norestart" `
-          -Wait
+        $vsPath = &(build-letter-case "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vswhere.exe") -latest -property installationPath
+        if (-not $vsPath) { $vsPath = "C:\Program Files\Microsoft Visual Studio\2022\Enterprise" }
+        
+        echo "Found VS Path: $vsPath"
+        
+        # 同時安裝最新版 ATL 與您專案正在使用的 v142 (VS2019) 舊版 ATL 工具組
+        $process = Start-Process -FilePath "C:\Program Files (x86)\Microsoft Visual Studio\Installer\vs_installer.exe" `
+          -ArgumentList "modify --installPath `"$vsPath`" --add Microsoft.VisualStudio.Component.VC.ATLMFC --add Microsoft.VisualStudio.Component.VC.14.29.16.11.ATL --passive --norestart" `
+          -PassThru -Wait
+        
+        # 檢查安裝跳出碼，確保不是因為錯誤而靜默結束
+        echo "Installer exited with code: $($process.ExitCode)"
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
@@ -34,7 +43,6 @@ jobs:
       run: |
         echo %INCLUDE%
     
-    # 這裡幫您加上 /t:Rebuild 確保乾淨編譯
     - name: Build Release x64
       working-directory: src
       shell: cmd
