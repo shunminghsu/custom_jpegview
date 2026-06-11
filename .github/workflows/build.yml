@@ -58,16 +58,20 @@ jobs:
         # 1. 建立臨時程式碼簽署憑證
         $cert = New-SelfSignedCertificate -Type CodeSigning -CertStoreLocation Cert:\CurrentUser\My -Subject "CN=GitHubActionBuild"
         
-        # 2. 尋找系統中的 signtool.exe（修正參數為 -Recurse）
-        $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin" -Filter "signtool.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1).FullName
+        # 2. 直接指定 x64 架構的絕對路徑（避免抓到 arm64）
+        $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe"
         
-        # 如果動態搜尋失敗，使用預設的 x64 工具路徑
-        if (-not $signtool) { $signtool = "C:\Program Files (x86)\Windows Kits\10\bin\10.0.26100.0\x64\signtool.exe" }
+        # 容錯機制：如果 10.0.26100.0 不存在，自動尋找其他 Windows 10/11 SDK 版本的 x64 signtool
+        if (-not (Test-Path $signtool)) {
+            $signtool = (Get-ChildItem -Path "C:\Program Files (x86)\Windows Kits\10\bin\*\x64\signtool.exe" | Select-Object -First 1).FullName
+        }
+        
         Write-Output "Using Signtool: $signtool"
         
         # 3. 執行數位簽章
         & $signtool sign /a /s My /n "GitHubActionBuild" /fd SHA256 src/JPEGView/bin/x64/Release/JPEGView.exe
         & $signtool sign /a /s My /n "GitHubActionBuild" /fd SHA256 src/JPEGView/bin/x64/Release/WICLoader.dll
+
 
 
     - name: Upload binaries
