@@ -8,20 +8,23 @@ jobs:
     runs-on: windows-latest
 
     steps:
-    - name: Checkout source
+    - name: Checkout
       uses: actions/checkout@v4
       with:
         submodules: recursive
-
+    
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
-
-    - name: Setup MSVC + ATL components
+    
+    - name: Setup MSVC dev environment (WITH ATL)
       uses: ilammy/msvc-dev-cmd@v1
+      with:
+        arch: x64
 
-    - name: Install VC++ ATL/MFC
+    - name: Verify MSVC environment
+      shell: cmd
       run: |
-        choco install visualstudio2022buildtools --package-parameters "--add Microsoft.VisualStudio.Component.VC.ATLMFC"
+        echo %INCLUDE%
     
     - name: Build Release x64
       working-directory: src
