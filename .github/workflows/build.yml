@@ -1,0 +1,18 @@
+name: Build JPEGView
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-2019
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+
+    - name: Build
+      run: |
+        msbuild custom_jpegview.sln /p:Configuration=Release /p:Platform=x64
