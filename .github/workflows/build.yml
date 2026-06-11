@@ -1,4 +1,4 @@
-name: Build JPEGView
+name: Build custom_jpegview VS2019
 
 on:
   workflow_dispatch:
@@ -8,11 +8,26 @@ jobs:
     runs-on: windows-2019
 
     steps:
-    - uses: actions/checkout@v4
+    - name: Checkout source
+      uses: actions/checkout@v4
+      with:
+        submodules: recursive
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
 
-    - name: Build
+    - name: Build Release x64
+      shell: cmd
       run: |
-        msbuild custom_jpegview.sln /p:Configuration=Release /p:Platform=x64
+        msbuild JPEGView.sln ^
+          /m ^
+          /p:Configuration=Release ^
+          /p:Platform=x64
+
+    - name: Upload binaries
+      uses: actions/upload-artifact@v4
+      with:
+        name: JPEGView-x64
+        path: |
+          JPEGView/bin/x64/Release/*.exe
+          JPEGView/bin/x64/Release/*.dll
